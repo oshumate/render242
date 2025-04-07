@@ -1,0 +1,26 @@
+{
+  "name": "render242",
+  "version": "1.0.0",
+  "description": "A Node/Express server for rendering live data",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oshumate/render242.git"
+  },
+  "keywords": [
+    "Render",
+    "project"
+  ],
+  "author": "Owen Shumate",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oshumate/render242/issues"
+  },
+  "homepage": "https://github.com/oshumate/render242#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Charliovski’s Dishes API</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <h2>Dishes API</h2>
+      <ul>
+        <li><a href="#" data-endpoint="/api/dishes">Get All Dishes</a></li>
+        <!-- future endpoints go here -->
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="content-header">
+        <h2 id="title">Select an endpoint</h2>
+        <button class="refresh-btn" id="refresh" title="Re‑fetch current endpoint">↻</button>
+      </div>
+      <pre id="output">{ }</pre>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
