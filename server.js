@@ -17,14 +17,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ------------------------------
 // Database Connection Setup
 // ------------------------------
-
-// Use the environment variable MONGODB_URI or default to a local MongoDB instance.
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/reservations-app';
 
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true 
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
@@ -33,7 +30,7 @@ mongoose.connect(MONGODB_URI, {
 // Dishes Endpoints (Existing)
 // ------------------------------
 
-// Assuming dishes data is exported from data.js
+// Importing dishes data from data.js (assumed to be an in-memory array)
 const dishes = require('./data.js');
 
 app.get('/api/dishes', (req, res) => {
@@ -41,15 +38,16 @@ app.get('/api/dishes', (req, res) => {
 });
 
 app.post('/api/dishes', (req, res) => {
-  const schema = Joi.object({
+  const dishSchema = Joi.object({
     name: Joi.string().required(),
     imageUrl: Joi.string().uri().required()
   });
 
-  const { error, value } = schema.validate(req.body);
+  const { error, value } = dishSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ success: false, error: error.details[0].message });
   }
+  
   dishes.push(value);
   res.json({ success: true, data: value });
 });
@@ -66,10 +64,9 @@ const reservationSchema = new mongoose.Schema({
   date: { type: String, required: true },
   time: { type: String, required: true }
 });
-
 const Reservation = mongoose.model('Reservation', reservationSchema);
 
-// Define a Joi schema for server-side validation of reservation data
+// Define a Joi schema for validating reservation input
 const reservationJoiSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
@@ -84,7 +81,7 @@ app.get('/api/reservations', async (req, res) => {
     const reservations = await Reservation.find();
     res.json({ reservations });
   } catch (err) {
-    console.error(err);
+    console.error('Error retrieving reservations:', err);
     res.status(500).json({ success: false, message: 'Error retrieving reservations' });
   }
 });
@@ -101,7 +98,7 @@ app.post('/api/reservations', async (req, res) => {
     await newReservation.save();
     res.json({ success: true, data: newReservation });
   } catch (err) {
-    console.error(err);
+    console.error('Error saving reservation:', err);
     res.status(500).json({ success: false, message: 'Could not save reservation' });
   }
 });
