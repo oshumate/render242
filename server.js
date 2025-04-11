@@ -10,6 +10,7 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Existing endpoints for dishes
 app.get('/api/dishes', (req, res) => {
   res.json(dishes);
 });
@@ -31,10 +32,42 @@ app.post('/api/dishes', (req, res) => {
   res.json({ success: true, data: value });
 });
 
+// ------------------------------
+// Add endpoints for reservations
+// ------------------------------
+
+// In-memory storage for reservations
+const reservations = [];
+
+// GET /api/reservations: Retrieve all reservations
+app.get('/api/reservations', (req, res) => {
+  res.json({ reservations });
+});
+
+// POST /api/reservations: Add a new reservation
+const reservationSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+  date: Joi.string().required(),
+  time: Joi.string().required()
+});
+
+app.post('/api/reservations', (req, res) => {
+  const { error, value } = reservationSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ success: false, message: error.details[0].message });
+  }
+  reservations.push(value);
+  res.json({ success: true, data: value });
+});
+
+// Root route to serve your index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Start the server
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
