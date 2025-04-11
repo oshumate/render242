@@ -2,17 +2,40 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const Joi = require('joi');
-const dishes = require('./data.js');  // existing dishes data
+const mongoose = require('mongoose');
+
+// Create an instance of express
 const app = express();
 
+// Middleware to enable CORS and JSON request parsing
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ------------------------------
-// Dishes endpoints (existing)
+// Database Connection Setup
 // ------------------------------
+
+// Use the environment variable MONGODB_URI or default to a local MongoDB instance.
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/reservations-app';
+
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+})
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+// ------------------------------
+// Dishes Endpoints (Existing)
+// ------------------------------
+
+// Assuming dishes data is exported from data.js
+const dishes = require('./data.js');
+
 app.get('/api/dishes', (req, res) => {
   res.json(dishes);
 });
@@ -27,25 +50,27 @@ app.post('/api/dishes', (req, res) => {
   if (error) {
     return res.status(400).json({ success: false, error: error.details[0].message });
   }
-
   dishes.push(value);
   res.json({ success: true, data: value });
 });
 
 // ------------------------------
-// Reservations endpoints (new)
+// Reservations Endpoints (New)
 // ------------------------------
 
-// In-memory storage for reservations
-const reservations = [];
-
-// GET /api/reservations: Retrieve all reservations
-app.get('/api/reservations', (req, res) => {
-  res.json({ reservations });
+// Define a Mongoose schema and model for Reservations
+const reservationSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+  date: { type: String, required: true },
+  time: { type: String, required: true }
 });
 
-// POST /api/reservations: Add a new reservation
-const reservationSchema = Joi.object({
+const Reservation = mongoose.model('Reservation', reservationSchema);
+
+// Define a Joi schema for server-side validation of reservation data
+const reservationJoiSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   phone: Joi.string().required(),
@@ -53,21 +78,45 @@ const reservationSchema = Joi.object({
   time: Joi.string().required()
 });
 
-app.post('/api/reservations', (req, res) => {
-  const { error, value } = reservationSchema.validate(req.body);
+// GET /api/reservations: Retrieve all reservations from the database
+app.get('/api/reservations', async (req, res) => {
+  try {
+    const reservations = await Reservation.find();
+    res.json({ reservations });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error retrieving reservations' });
+  }
+});
+
+// POST /api/reservations: Create a new reservation in the database
+app.post('/api/reservations', async (req, res) => {
+  const { error, value } = reservationJoiSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ success: false, message: error.details[0].message });
   }
-  reservations.push(value);
-  res.json({ success: true, data: value });
+  
+  try {
+    const newReservation = new Reservation(value);
+    await newReservation.save();
+    res.json({ success: true, data: newReservation });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Could not save reservation' });
+  }
 });
 
-// Serve the main HTML file for any other routes.
+// ------------------------------
+// Serve the Main HTML File
+// ------------------------------
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start the server.
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running on port ${process.env.PORT || 3000}`);
+// ------------------------------
+// Start the Server
+// ------------------------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
