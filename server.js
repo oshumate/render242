@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const Joi = require('joi');
-const dishes = require('./data.js');
+const dishes = require('./data.js');  // existing dishes data
 const app = express();
 
 app.use(cors());
@@ -10,7 +10,9 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Existing endpoints for dishes
+// ------------------------------
+// Dishes endpoints (existing)
+// ------------------------------
 app.get('/api/dishes', (req, res) => {
   res.json(dishes);
 });
@@ -22,18 +24,16 @@ app.post('/api/dishes', (req, res) => {
   });
 
   const { error, value } = schema.validate(req.body);
-
   if (error) {
     return res.status(400).json({ success: false, error: error.details[0].message });
   }
 
   dishes.push(value);
-
   res.json({ success: true, data: value });
 });
 
 // ------------------------------
-// Add endpoints for reservations
+// Reservations endpoints (new)
 // ------------------------------
 
 // In-memory storage for reservations
@@ -62,12 +62,12 @@ app.post('/api/reservations', (req, res) => {
   res.json({ success: true, data: value });
 });
 
-// Root route to serve your index.html
+// Serve the main HTML file for any other routes.
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start the server
+// Start the server.
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
