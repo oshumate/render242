@@ -1,15 +1,34 @@
 const express = require('express');
-const cors = require('cors'); // Import the CORS middleware
+const cors = require('cors');
 const path = require('path');
-const dishes = require('./data.js');    // your data file in project root
+const Joi = require('joi');
+const dishes = require('./data.js');
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/dishes', (req, res) => {
   res.json(dishes);
+});
+
+app.post('/api/dishes', (req, res) => {
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    imageUrl: Joi.string().uri().required()
+  });
+
+  const { error, value } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ success: false, error: error.details[0].message });
+  }
+
+  dishes.push(value);
+
+  res.json({ success: true, data: value });
 });
 
 app.get('/', (req, res) => {
