@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ---------------------------------
 // Database Connection Setup
 // ---------------------------------
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/reservations-app';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://charliovski2:test123@cluster0.kzvtq46.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
