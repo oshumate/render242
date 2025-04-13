@@ -3,7 +3,6 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-// Define a Mongoose schema and model for Reservations
 const reservationSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
@@ -13,7 +12,6 @@ const reservationSchema = new mongoose.Schema({
 });
 const Reservation = mongoose.model('Reservation', reservationSchema);
 
-// Define a Joi schema for validation
 const reservationJoiSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
@@ -22,7 +20,6 @@ const reservationJoiSchema = Joi.object({
   time: Joi.string().required()
 });
 
-// GET reservations
 router.get('/', async (req, res) => {
   try {
     const reservations = await Reservation.find();
@@ -33,7 +30,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST reservation
 router.post('/', async (req, res) => {
   const { error, value } = reservationJoiSchema.validate(req.body);
   if (error) {

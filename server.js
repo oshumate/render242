@@ -6,16 +6,11 @@ const mongoose = require('mongoose');
 
 const app = express();
 
-// Middleware: Enable CORS and JSON parsing
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---------------------------------
-// Database Connection Setup
-// ---------------------------------
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://charliovski2:test123@cluster0.kzvtq46.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGODB_URI, {
@@ -25,9 +20,6 @@ mongoose.connect(MONGODB_URI, {
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// ---------------------------------
-// Dishes Endpoints (Using In-Memory Data)
-// ---------------------------------
 const dishes = require('./data.js');
 
 app.get('/api/dishes', (req, res) => {
@@ -54,9 +46,7 @@ app.post('/api/dishes', (req, res) => {
   res.json({ success: true, data: value });
 });
 
-// ---------------------------------
-// Reservations Endpoints (Using MongoDB)
-// ---------------------------------
+
 const reservationSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
@@ -74,7 +64,7 @@ const reservationJoiSchema = Joi.object({
   time: Joi.string().required()
 });
 
-// GET /api/reservations: Retrieve all reservations from MongoDB
+
 app.get('/api/reservations', async (req, res) => {
   try {
     console.log('GET /api/reservations: Fetching reservations.');
@@ -87,7 +77,7 @@ app.get('/api/reservations', async (req, res) => {
   }
 });
 
-// POST /api/reservations: Save a new reservation to MongoDB
+
 app.post('/api/reservations', async (req, res) => {
   console.log('POST /api/reservations: Received reservation data:', req.body);
   
@@ -108,16 +98,12 @@ app.post('/api/reservations', async (req, res) => {
   }
 });
 
-// ---------------------------------
-// Serve the Main HTML File
-// ---------------------------------
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ---------------------------------
-// Start the Server
-// ---------------------------------
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
